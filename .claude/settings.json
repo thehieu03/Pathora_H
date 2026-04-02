@@ -1,0 +1,52 @@
+{
+  "enableAllProjectMcpServers": true,
+  "permissions": {
+    "allow": [
+      "Bash(git:*)",
+      "Bash(npm:*)",
+      "Bash(npx:*)",
+      "Bash(node:*)",
+      "Bash(dotnet:*)",
+      "Bash(cd:*)",
+      "Bash(powershell:*)",
+      "Bash(curl:*)",
+      "Bash(mkdir:*)",
+      "Bash(rm:*)",
+      "Bash(type:*)",
+      "Bash(dotclean:*)"
+    ],
+    "deny": [
+      "Bash(rm -rf /:*)",
+      "Bash(rm -rf /*:*)",
+      "Bash(Format-Volume:*)",
+      "Bash(shutdown:*)",
+      "Bash(del /f /s /q:*)"
+    ],
+    "defaultMode": "acceptEdits",
+    "additionalDirectories": [
+      "D:\\DoAn\\panthora_be",
+      "D:\\Doan2\\panthora_be",
+      "D:\\Doan2\\pathora"
+    ]
+  },
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node -e \"const d=JSON.parse(require('fs').readFileSync(0,'utf8')); const f=d.tool_input?.file_path||d.tool_response?.filePath||''; if(!f) process.exit(0); const isFrontend=f.includes('pathora/frontend')||f.includes('pathora\\\\frontend'); const isBackend=f.includes('panthora_be'); if(isFrontend) require('child_process').exec('cd D:/Doan2/pathora/frontend && npm run lint --silent', ()=>{}); if(isBackend) require('child_process').exec('cd D:/Doan2/panthora_be && dotnet build LocalService.slnx --verbosity quiet', ()=>{});\"",
+            "timeout": 60,
+            "statusMessage": "Running lint/build..."
+          }
+        ]
+      }
+    ]
+  },
+  "agent": "agent",
+  "worktree": {
+    "symlinkDirectories": ["node_modules", ".cache", ".next", "bin", "obj"],
+    "sparsePaths": ["panthora_be/src", "panthora_be/tests", "pathora/frontend/src", "pathora/frontend/tests"]
+  }
+}
