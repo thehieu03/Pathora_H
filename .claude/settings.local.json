@@ -55,7 +55,8 @@
       "Bash(while read:*)",
       "Bash(do echo:*)",
       "Read(//d/Doan2/$USERPROFILE/.claude/session-env/**)",
-      "Bash(done)"
+      "Bash(done)",
+      "Bash(wsl docker:*)"
     ]
   }
 }
