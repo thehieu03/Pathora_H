@@ -1,0 +1,99 @@
+name: doan2
+
+services:
+  api:
+    build:
+      context: ./panthora_be
+      dockerfile: src/Api/Dockerfile
+    container_name: doan2-api
+    environment:
+      ASPNETCORE_ENVIRONMENT: ${ASPNETCORE_ENVIRONMENT}
+      ASPNETCORE_URLS: ${ASPNETCORE_URLS}
+      Auth__DisableAuthorization: ${Auth__DisableAuthorization}
+      Dev__EnableDevEndpoints: ${Dev__EnableDevEndpoints}
+      Dev__ResetAndReseedOnStartup: ${Dev__ResetAndReseedOnStartup}
+      Dev__DevApiKey: ${Dev__DevApiKey}
+      ConnectionStrings__Default: ${ConnectionStrings__Default}
+      Redis__ConnectionString: ${Redis__ConnectionString}
+      Jwt__Secret: ${Jwt__Secret}
+      Jwt__Issuer: ${Jwt__Issuer}
+      Jwt__Audience: ${Jwt__Audience}
+      Jwt__ExpireInMinutes: ${Jwt__ExpireInMinutes}
+      Jwt__AccessTokenCookieExpirationHours: ${Jwt__AccessTokenCookieExpirationHours}
+      Jwt__RefreshTokenExpirationHours: ${Jwt__RefreshTokenExpirationHours}
+      Authentication__Google__ClientId: ${Authentication__Google__ClientId}
+      Authentication__Google__ClientSecret: ${Authentication__Google__ClientSecret}
+      Cloudinary__CloudName: ${Cloudinary__CloudName}
+      Cloudinary__ApiKey: ${Cloudinary__ApiKey}
+      Cloudinary__ApiSecret: ${Cloudinary__ApiSecret}
+      Cloudinary__DefaultFolder: ${Cloudinary__DefaultFolder}
+      Cors__AllowedOrigins__0: ${Cors__AllowedOrigins__0}
+      RateLimit__GlobalPermitLimit: ${RateLimit__GlobalPermitLimit}
+      RateLimit__AuthPermitLimit: ${RateLimit__AuthPermitLimit}
+      RateLimit__WindowSeconds: ${RateLimit__WindowSeconds}
+      OutboxWorker__PollingIntervalMs: ${OutboxWorker__PollingIntervalMs}
+      OutboxWorker__BatchSize: ${OutboxWorker__BatchSize}
+      OutboxWorker__MaxRetries: ${OutboxWorker__MaxRetries}
+      AppConfig__ServiceName: ${AppConfig__ServiceName}
+      AppConfig__FrontendBaseUrl: ${AppConfig__FrontendBaseUrl}
+      AppConfig__SwaggerBaseUrl: ${AppConfig__SwaggerBaseUrl}
+      OpenTelemetry__Endpoint: ${OpenTelemetry__Endpoint}
+      VietQR__ApiUrl: ${VietQR__ApiUrl}
+      VietQR__BankBin: ${VietQR__BankBin}
+      VietQR__AccountNo: ${VietQR__AccountNo}
+      VietQR__AccountName: ${VietQR__AccountName}
+      VietQR__TemplateId: ${VietQR__TemplateId}
+      SePay__ApiUrl: ${SePay__ApiUrl}
+      SePay__AccountNumber: ${SePay__AccountNumber}
+      SePay__ApiKey: ${SePay__ApiKey}
+      SePay__WebhookSecret: ${SePay__WebhookSecret}
+      Payment__Account: ${Payment__Account}
+      Payment__Bank: ${Payment__Bank}
+      Payment__AuthenticationKey: ${Payment__AuthenticationKey}
+      Payment__ApiBaseUrl: ${Payment__ApiBaseUrl}
+      Payment__QrBaseUrl: ${Payment__QrBaseUrl}
+      Payment__PollingLimit: ${Payment__PollingLimit}
+      Payment__PollingIntervalSeconds: ${Payment__PollingIntervalSeconds}
+      Payment__SepayWebhookSecret: ${Payment__SepayWebhookSecret}
+      Payment__RateLimitSeconds: ${Payment__RateLimitSeconds}
+      Mail__Host: ${Mail__Host}
+      Mail__Port: ${Mail__Port}
+      Mail__UseAuthentication: ${Mail__UseAuthentication}
+      Mail__UserName: ${Mail__UserName}
+      Mail__Password: ${Mail__Password}
+    ports:
+      - "8899:8899"
+      - "8891:8891"
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8899/health/live"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+
+  web:
+    build:
+      context: ./pathora/frontend
+      dockerfile: Dockerfile
+      args:
+        NEXT_PUBLIC_API_GATEWAY: ${NEXT_PUBLIC_API_GATEWAY}
+        NEXT_PUBLIC_REMOTE_IMAGE_HOSTS: ${NEXT_PUBLIC_REMOTE_IMAGE_HOSTS}
+        NEXT_PUBLIC_IMAGES_UNOPTIMIZED: ${NEXT_PUBLIC_IMAGES_UNOPTIMIZED}
+    container_name: doan2-web
+    environment:
+      NEXT_PUBLIC_API_GATEWAY: ${NEXT_PUBLIC_API_GATEWAY}
+      NEXT_PUBLIC_REMOTE_IMAGE_HOSTS: ${NEXT_PUBLIC_REMOTE_IMAGE_HOSTS}
+      NEXT_PUBLIC_IMAGES_UNOPTIMIZED: ${NEXT_PUBLIC_IMAGES_UNOPTIMIZED}
+    ports:
+      - "3003:3003"
+    depends_on:
+      api:
+        condition: service_healthy
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3003"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
